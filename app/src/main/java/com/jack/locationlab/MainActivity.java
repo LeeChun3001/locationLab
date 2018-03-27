@@ -13,8 +13,15 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.GoogleMap;
 
 import org.w3c.dom.Text;
@@ -36,6 +43,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     String lonn;
     private String TAG = "TAG";
 
+
+    private PlaceAutocompleteAdapter adapter;
+    private AutoCompleteTextView autocompleteView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +55,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         gps = findViewById(R.id.tv_gps);
         tv2 = findViewById(R.id.tv2);
         tv3 = findViewById(R.id.tv3);
+
+        gps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openGpsService();
+            }
+        });
+        autocompleteView = findViewById(R.id.autoTextview);
+
+
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .build();
+
+
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -61,6 +87,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
 
+    @SuppressLint("MissingPermission")
+    private void openGpsService() {
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -122,11 +153,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
         tv3.setText(lat + ","+ lon);
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+
         Log.e(TAG, "getGPS: "+ latt +", " + lonn);
 
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
     }
 
     @Override
