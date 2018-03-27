@@ -3,6 +3,7 @@ package com.jack.locationlab;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -20,13 +21,14 @@ import org.w3c.dom.Text;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.INTERNET;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
 
     private TextView gps;
+    private TextView tv2,tv3;
     private LocationManager locationManager;
-    private LocationListener locationListeners;
     private static final int REQUEST_CONTACTS = 1;
     double lat = 22.965523;
     double lon = 120.168657 ;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.activity_main);
 
         gps = findViewById(R.id.tv_gps);
+        tv2 = findViewById(R.id.tv2);
+        tv3 = findViewById(R.id.tv3);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if (permission != PackageManager.PERMISSION_GRANTED) {
             //未取得權限，向使用者要求允許權限
             ActivityCompat.requestPermissions( this,
-                    new String[]{ACCESS_FINE_LOCATION ,ACCESS_COARSE_LOCATION},
+                    new String[]{ACCESS_FINE_LOCATION},
                     REQUEST_CONTACTS );
         }else{
             //已有權限，可進行檔案存取
@@ -79,6 +83,44 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @SuppressLint("MissingPermission")
     public void getGPS() {
+
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setBearingRequired(true);//是否要求方向
+        criteria.setCostAllowed(true);//是否要求收费
+
+        String rovider  = locationManager.getBestProvider(criteria,true);
+
+
+        Location x = null ;
+        Location y = null ;
+        //利用網路輔助定位
+        x = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+
+        String lon = "empty";
+        String lat = "empty";
+
+
+        if (x != null) {
+
+            lon = String.valueOf(x.getLongitude());
+            lat = String.valueOf(x.getLatitude());
+        }
+        tv2.setText(lat + ","+ lon);
+
+
+        lon = "empty";
+        lat = "empty";
+
+        //利用GPS精準定位
+        y = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (y != null) {
+
+            lon = String.valueOf(x.getLongitude());
+            lat = String.valueOf(x.getLatitude());
+        }
+        tv3.setText(lat + ","+ lon);
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
