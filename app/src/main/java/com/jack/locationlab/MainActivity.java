@@ -15,21 +15,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.location.places.PlaceBuffer;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
 
-import org.w3c.dom.Text;
-
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.INTERNET;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -44,10 +39,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     String lonn;
     private String TAG = "TAG";
 
-
-    private PlaceAutocompleteAdapter adapter;
-    private AutoCompleteTextView autocompleteView;
-
+    int PLACE_PICKER_REQUEST = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,20 +53,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             @Override
             public void onClick(View v) {
 //                openGpsService();
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
+
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+
+                try {
+                    startActivityForResult(builder.build(MainActivity.this), PLACE_PICKER_REQUEST);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+//
+//
             }
         });
 
 
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .build();
-
-
-
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
+        getPermission();
+
+
+
+    }
+
+    private void getPermission() {
         int permission = ActivityCompat.checkSelfPermission(this,
                 ACCESS_FINE_LOCATION);
         if (permission != PackageManager.PERMISSION_GRANTED) {
@@ -166,6 +169,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         super.onPause();
         locationManager.removeUpdates(this);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(data, this);
+                String toastMsg = String.format("Place: %s", place.getName());
+                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                intent.putExtra("lon", place.getLatLng().longitude);
+                intent.putExtra("lat", place.getLatLng().latitude);
+                intent.putExtra("name", place.getName().toString());
+                startActivity(intent);
+            }
+        }
+    }
+
 
     @Override
     public void onLocationChanged(Location location) {

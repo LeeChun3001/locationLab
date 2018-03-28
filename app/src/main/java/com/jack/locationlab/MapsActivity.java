@@ -3,6 +3,7 @@ package com.jack.locationlab;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -13,9 +14,9 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
+
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -43,6 +44,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String TAG = "TAG";
 
     String StrCurrent ;
+    private LatLng search;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         checkPermission();
 
+
+        Intent gpsi = getIntent();
+        StrCurrent = gpsi.getStringExtra("name");
+        double gpslat = gpsi.getDoubleExtra("lat",22.965523);
+        double gpslon = gpsi.getDoubleExtra("lon", 120.168657);
+        search = new LatLng(gpslat, gpslon);
+
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -62,7 +72,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.e(TAG, "Place: " + place.getName());
                 StrCurrent = place.getName().toString();
                 current = place.getLatLng();
-                selectLocation();
+                selectLocation(StrCurrent,current);
             }
 
             @Override
@@ -76,15 +86,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
 
-    private void selectLocation() {
+    private void selectLocation(String placeName ,LatLng latLng) {
 //        current = new LatLng(lat, lon);
+
         CameraPosition currentPosition = CameraPosition.builder()
-                .target(current)
-                .zoom(12)
+                .target(latLng)
+                .zoom(18)
                 .bearing(0)
                 .tilt(0)
                 .build();
-        mMap.addMarker(new MarkerOptions().position(current).title(StrCurrent));
+        mMap.addMarker(new MarkerOptions().position(latLng).title(placeName));
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPosition),2000,null);
     }
 
@@ -134,13 +145,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        selectLocation(StrCurrent,search);
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
                 StrCurrent = latLng.toString();
                 current = latLng;
-                selectLocation();
+                selectLocation(StrCurrent,current);
             }
         });
         // Add a marker in Sydney and move the camera
