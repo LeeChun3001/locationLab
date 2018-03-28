@@ -2,6 +2,7 @@ package com.jack.locationlab;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -59,10 +60,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         gps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openGpsService();
+//                openGpsService();
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                startActivity(intent);
             }
         });
-        autocompleteView = findViewById(R.id.autoTextview);
 
 
         GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)

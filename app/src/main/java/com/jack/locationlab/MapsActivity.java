@@ -103,13 +103,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    @SuppressLint("MissingPermission")
+    private void openGpsService() {
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+    }
 
     @SuppressLint("MissingPermission")
     public void getGPS() {
         latt = String.valueOf(lat);
         lonn = String.valueOf(lon);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+
         Log.e(TAG, "getGPS: "+ latt +", " + lonn);
 
     }
