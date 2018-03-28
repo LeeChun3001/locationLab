@@ -135,6 +135,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                StrCurrent = latLng.toString();
+                current = latLng;
+                selectLocation();
+            }
+        });
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
 
