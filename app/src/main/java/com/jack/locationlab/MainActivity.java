@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     new String[]{ACCESS_FINE_LOCATION},
                     REQUEST_CONTACTS );
         }else{
-            //已有權限，可進行檔案存取
+            //已有權限
             getGPS();
         }
     }
@@ -100,12 +100,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         switch (requestCode) {
             case REQUEST_CONTACTS:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //取得聯絡人權限，進行存取
+                    //必須允許GPS權限
                     getGPS();
                 } else {
                     //使用者拒絕權限，顯示對話框告知
                     new AlertDialog.Builder(this)
-                            .setMessage("必須允許聯絡人權限才能顯示資料")
+                            .setMessage("必須允許GPS權限")
                             .setPositiveButton("OK", null)
                             .show();
                 }

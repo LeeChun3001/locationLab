@@ -14,6 +14,10 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,6 +42,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String lonn;
     private String TAG = "TAG";
 
+    String StrCurrent ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,8 +53,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        checkPermission();
+
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                Log.e(TAG, "Place: " + place.getName());
+                StrCurrent = place.getName().toString();
+                current = place.getLatLng();
+                selectLocation();
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.e(TAG, "An error occurred: " + status);
+            }
+        });
 
 
+
+
+        }
+
+    private void selectLocation() {
+//        current = new LatLng(lat, lon);
+        CameraPosition currentPosition = CameraPosition.builder()
+                .target(current)
+                .zoom(12)
+                .bearing(0)
+                .tilt(0)
+                .build();
+        mMap.addMarker(new MarkerOptions().position(current).title(StrCurrent));
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPosition),2000,null);
+    }
+
+    private void checkPermission() {
         int permission = ActivityCompat.checkSelfPermission(this,
                 ACCESS_FINE_LOCATION);
         if (permission != PackageManager.PERMISSION_GRANTED) {
@@ -61,9 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //已有權限，可進行檔案存取
             getGPS();
         }
-
-
-        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -72,12 +109,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case REQUEST_CONTACTS:
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //取得聯絡人權限，進行存取
+                    //必須允許GPS權限
                     getGPS();
                 } else {
                     //使用者拒絕權限，顯示對話框告知
                     new AlertDialog.Builder(this)
-                            .setMessage("必須允許聯絡人權限才能顯示資料")
+                            .setMessage("必須允許GPS權限")
                             .setPositiveButton("OK", null)
                             .show();
                 }
@@ -128,15 +165,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         lat =  location.getLatitude();
         lon =  location.getLongitude();
-        current = new LatLng(lat, lon);
-        CameraPosition currentPosition = CameraPosition.builder()
-                .target(current)
-                .zoom(17)
-                .bearing(0)
-                .tilt(30)
-                .build();
-        mMap.addMarker(new MarkerOptions().position(current).title("currentPosition"));
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPosition),2000,null);
+
     }
 
     @Override
