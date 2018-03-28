@@ -18,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -31,7 +32,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationListener locationListener;
     private static final int REQUEST_CONTACTS = 1;
     double lat = 22.965523;
-    double lon = 120.168657 ;
+    double lon = 120.168657;
+    LatLng current ;
     String latt;
     String lonn;
     private String TAG = "TAG";
@@ -98,10 +100,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
+
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+    }
 
     @SuppressLint("MissingPermission")
     private void openGpsService() {
@@ -111,17 +119,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @SuppressLint("MissingPermission")
     public void getGPS() {
-        latt = String.valueOf(lat);
-        lonn = String.valueOf(lon);
 
-        Log.e(TAG, "getGPS: "+ latt +", " + lonn);
+        openGpsService();
 
     }
     @Override
     public void onLocationChanged(Location location) {
 
-       lat =  location.getLatitude();
-       lon =  location.getLongitude();
+        lat =  location.getLatitude();
+        lon =  location.getLongitude();
+        current = new LatLng(lat, lon);
+        CameraPosition currentPosition = CameraPosition.builder()
+                .target(current)
+                .zoom(17)
+                .bearing(0)
+                .tilt(30)
+                .build();
+        mMap.addMarker(new MarkerOptions().position(current).title("currentPosition"));
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPosition),2000,null);
     }
 
     @Override
