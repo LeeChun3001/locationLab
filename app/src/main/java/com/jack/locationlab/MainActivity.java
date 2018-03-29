@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     String lonn;
     private String TAG = "TAG";
 
+
     int PLACE_PICKER_REQUEST = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,8 +177,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(data, this);
                 String toastMsg = String.format("Place: %s", place.getName());
-                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
-
+//                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, place.getAddress().toString(), Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                 intent.putExtra("lon", place.getLatLng().longitude);
                 intent.putExtra("lat", place.getLatLng().latitude);
