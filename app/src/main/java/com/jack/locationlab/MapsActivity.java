@@ -54,6 +54,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Location currentlocation = new Location("");
     Location destlocation = new Location("");
     private SupportMapFragment mapFragment;
+    private Button mylocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        mylocation = findViewById(R.id.button3);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         checkPermission();
@@ -98,11 +101,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         CameraPosition currentPosition = CameraPosition.builder()
                 .target(latLng)
-                .zoom(18)
+                .zoom(17)
                 .bearing(0)
                 .tilt(0)
                 .build();
-        mMap.addMarker(new MarkerOptions().position(latLng).title(placeName));
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPosition), 2000, null);
     }
 
@@ -169,6 +171,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
+
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         checkPermission();
@@ -178,6 +182,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.setMyLocationEnabled(true);
         mMap.isMyLocationEnabled();
+
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        
 
 
         View locationButton = ((View) mapFragment.getView().findViewById(Integer.parseInt("1")).
@@ -224,6 +231,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         currentlocation.setLatitude(lat);
         currentlocation.setLongitude(lon);
+
+        final LatLng latLng = new LatLng(lat,lon);
+        mylocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectLocation("",latLng);
+            }
+        });
 
     }
 
